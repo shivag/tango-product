@@ -108,6 +108,10 @@ Every sub-item is tagged with its floor kind.*
 
 Rules:
 - Every rubric item must be **binary** (pass/fail) and **verifiable** (by spike or citation). No 0-10 scales. No vague words like "easy," "delightful," or "scalable."
+- **Every rubric MUST include at least three "antibiotic" items** — painkillers, not vitamins — at least one each:
+  - **Painkiller test** (Product rubric): the target user is suffering a *named, quantified* pain today; shipping the MVP removes it. A vitamin is nice-to-have; if the user's life is fine without this product, flag it. Example antibiotic: "solo devs currently spend ≥ 30 min manually auditing each new skill; MVP reduces to < 30 seconds." Example vitamin (reject): "improves developer experience."
+  - **Friction floor** (Product rubric): *time from install to first-delivered-value is ≤ N minutes, measured by a new-user walkthrough*. No account creation, no config files, no reading docs. If the MVP needs any of those, quantify the friction and defend it.
+  - **Time-to-user** (Business rubric): *v0 ships in ≤ N days from rubric approval, usable by a single real developer who isn't you*. A product nobody touches for 3 months while it gets perfect isn't an antibiotic — it's a research project.
 - Every **constraint sub-item** must carry one of four floor tags:
   - **`(mkt: <segment/competitor>)`** — market/positioning floor. Relaxable only by changing who the product is for. (e.g. `(mkt: solo SaaS founders)` buyer budget ≤ $100/mo.)
   - **`(dep: <platform/library/API>)`** — technical dependency floor. Relaxable only by swapping the dependency. (e.g. `(dep: Cloudflare Workers)` 30s CPU cap per request.)
@@ -171,9 +175,12 @@ Tasks:
 3. Find any item across the three sub-rubrics (Product / Technical / Business) that CONTRADICTS another. Flag them.
 4. Find any rubric item too easy to pass (trivial win) and propose a harder version.
 5. Check every constraint against the spikes — is there evidence for this being a floor, or is it asserted?
-6. Output your COMPLETE revised rubric in the exact same markdown format.
+6. **Antibiotic check** — name every rubric item that reads like a vitamin ("improves X," "enhances Y," "enables Z") and either delete it or rewrite as a painkiller tied to a named, quantified user pain. Vitamins are easy to ship and nobody cares; antibiotics are hard but someone pays immediately.
+7. **Friction audit** — for every Product-rubric item, ask "what does the user have to do *before* they get value?" If the answer is more than one step (install + one command), flag the item and propose a simpler version that hides or eliminates the step.
+8. **Simpler-more-powerful sweep** — for every Technical-rubric or architecture claim, ask "is there a dumber design that delivers 80% of the value in 20% of the build?" If yes, name it. Prefer one-file scripts over frameworks, prefer hooks on existing tools over new daemons, prefer a shell wrapper over a TypeScript service.
+9. Output your COMPLETE revised rubric in the exact same markdown format.
 
-Be ruthless. Every vague word you let through will cause a product to ship that doesn't work."""
+Be ruthless. Every vague word you let through will cause a product to ship that doesn't work. Every vitamin you let through will cause a product to ship that nobody uses."""
 )
 print(response.text)
 ```
@@ -272,6 +279,10 @@ Tasks:
 4. Flag any CROSS-SECTION CONTRADICTIONS — a Product promise the Technical section can't deliver, a Technical choice that breaks a Business constraint, etc.
 5. Flag any SCOPE CREEP — a feature in the patch that doesn't map to any rubric item.
 6. Flag any TECH CHOICE without defense — "why Postgres, not Dynamo?", "why Next, not Remix?"
+7. **VITAMIN FLAG** — is this patch adding a "nice-to-have" instead of addressing a named quantified pain? If yes, REJECT and name the vitamin. Acceptable patches tighten painkillers; patches that add polish before the painkiller lands are rejected.
+8. **FRICTION FLAG** — does this patch add a step between "user installs" and "user gets value"? Count the steps in the happy path (install + commands + config + account signup + ...). If the patch grows that number, REJECT unless the gain justifies the step.
+9. **SIMPLER-MORE-POWERFUL CHALLENGE** — propose at least one dumber design that delivers ≥ 80% of the patch's value in ≤ 20% of the build. One-file script > framework. Hook on existing tool > new daemon. Shell wrapper > full service. If the simpler design exists, REJECT and name it; the Driver has to defend why the fancier design is needed.
+10. **TIME-TO-USER FLAG** — would this patch delay v0 reaching a real outside developer by more than a few days? If yes, REJECT unless the patch is on the critical path to shipping. Polish, abstractions, and future-proofing get deferred until after v0 is in somebody's hands.
 
 Output format:
 VERDICT: ACCEPT or REJECT
@@ -283,6 +294,10 @@ UNGROUNDED CLAIMS: (list)
 CROSS-SECTION CONTRADICTIONS: (list)
 SCOPE CREEP: (list)
 UNDEFENDED TECH CHOICES: (list)
+VITAMINS: (list — patch elements that are nice-to-have, not painkiller)
+FRICTION ADDED: (list — new steps between install and first value)
+SIMPLER ALTERNATIVES: (list — dumber designs that get 80% of the value)
+TIME-TO-USER RISK: (list — anything that delays v0 reaching a real outside user)
 REASONING: (2-3 sentences)
 SUGGESTION: (if rejecting, what to change)
 
