@@ -364,6 +364,23 @@ Output: one row per relaxable sub-item, then a prose summary of the 🚨 flags.
 
 **Commit:** `git add constraint_audit_rN.md && git commit -m "tango: constraint audit round N"`.
 
+### H.1 Post-pivot hygiene — grep before the next critique
+
+If the audit triggers a rubric or constraint pivot (user approves a relaxation that flips an R-item verdict), the **next Driver patch MUST include a pre-critique grep sweep for pre-pivot vocabulary.**
+
+Stale terms in `arena.md`, `rubric.md`, `arena.md`'s ELI12, and any patch proposal that survive a surgical rewrite create cross-section contradictions the Critic will flag as fatal. These rejections are *preventable*.
+
+**Mechanic.** Before sending the post-pivot patch to the Critic:
+
+1. Identify the vocabulary the pivot retired. Example: if `C2.2` flipped from *CLI wrapper* to *agent hook*, retired terms include `npx skills-watch <skill>`, `--allow <path>` CLI flag, env-var-based overrides, any example output referencing the old mechanism.
+2. `grep -rn "<term>"` across `arena.md`, `rubric.md`, any open patch files, and the ELI12 changelog.
+3. Normalize every occurrence to the new vocabulary.
+4. Only then invoke the Critic.
+
+**Why this matters.** Without the sweep, a single pivot costs two Critic rounds instead of one — one for the structural change, a second REJECT for the stale references the structural change missed. Two rounds of Gemini latency + user wait. The grep sweep takes seconds and saves a round.
+
+**Verification.** The Driver should paste the grep output (showing zero matches for the retired terms) into `debate_log.md` before sending the patch, so the Critic can trust the sweep happened.
+
 ---
 
 ## Phase 2: Converge — hoist arena.md into three shipped documents
