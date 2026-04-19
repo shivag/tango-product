@@ -122,7 +122,7 @@ The tag is load-bearing for the constraint audit in Phase 1 Step H — without i
 
 ### Step 4: Send rubric to Gemini for attack
 
-**API key loading.** The user stores secrets in `~/.agents/.env` as `KEY=value` lines. Tango-product shares the `GEMINI_API_TANGO_KEY` key with tango-research. Always load `GEMINI_API_TANGO_KEY` from that file first; fall back to `GEMINI_API_KEY` in the file, then the process env, only if the preferred value is absent. Do NOT trust a key already in `os.environ` unless it matches the file — placeholder values like `your-key` are common.
+**API key loading.** The user stores secrets in `~/.agents/` as `KEY=value` lines. Tango-product shares the `GEMINI_API_TANGO_KEY` key with tango-research. Always check **`~/.agents/tango.env` first** (preferred — scopes cleanly with [skills-watch](https://github.com/shivag/skills-watch) or any other runtime guard, so only Tango-family skills can read the Tango Gemini key), then fall back to **`~/.agents/.env`** (legacy shared-wallet location). Load `GEMINI_API_TANGO_KEY` first, fall back to `GEMINI_API_KEY`, then the process env. Do NOT trust a key already in `os.environ` unless it matches a file value — placeholder values like `your-key` are common.
 
 Write and execute this Python script:
 
@@ -132,14 +132,20 @@ import os, sys, pathlib
 from google import genai
 
 def load_key():
-    env_file = pathlib.Path.home() / ".agents" / ".env"
+    # Preferred: ~/.agents/tango.env (scopes with skills-watch / per-skill allow-lists).
+    # Fallback: ~/.agents/.env (legacy shared-wallet location).
+    env_files = [
+        pathlib.Path.home() / ".agents" / "tango.env",
+        pathlib.Path.home() / ".agents" / ".env",
+    ]
     file_vals = {}
-    if env_file.exists():
-        for line in env_file.read_text().splitlines():
-            line = line.strip()
-            for name in ("GEMINI_API_TANGO_KEY", "GEMINI_API_KEY"):
-                if line.startswith(f"{name}="):
-                    file_vals[name] = line.split("=", 1)[1].strip().strip('"').strip("'")
+    for env_file in env_files:
+        if env_file.exists():
+            for line in env_file.read_text().splitlines():
+                line = line.strip()
+                for name in ("GEMINI_API_TANGO_KEY", "GEMINI_API_KEY"):
+                    if line.startswith(f"{name}=") and name not in file_vals:
+                        file_vals[name] = line.split("=", 1)[1].strip().strip('"').strip("'")
     return (file_vals.get("GEMINI_API_TANGO_KEY")
             or file_vals.get("GEMINI_API_KEY")
             or os.environ.get("GEMINI_API_TANGO_KEY")
@@ -147,7 +153,7 @@ def load_key():
 
 api_key = load_key()
 if not api_key or api_key in ("your-key", ""):
-    print("ERROR: GEMINI_API_TANGO_KEY / GEMINI_API_KEY not found in ~/.agents/.env or env"); sys.exit(1)
+    print("ERROR: GEMINI_API_TANGO_KEY / GEMINI_API_KEY not found in ~/.agents/tango.env, ~/.agents/.env, or environment"); sys.exit(1)
 
 client = genai.Client(api_key=api_key)
 

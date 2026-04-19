@@ -27,7 +27,7 @@ Installs to `.agents/skills/tango-product/` (read by Cursor, Gemini CLI, Codex, 
 ## Prerequisites
 
 - **Python 3** + `google-genai` — `pip install google-genai`
-- **Gemini API key** at `~/.agents/.env` as `GEMINI_API_TANGO_KEY=your-key` (or `GEMINI_API_KEY` as fallback). Get a key at [aistudio.google.com](https://aistudio.google.com/apikey).
+- **Gemini API key** at `~/.agents/tango.env` (preferred — scopes cleanly with [skills-watch](https://github.com/shivag/skills-watch) runtime guard) or `~/.agents/.env` (legacy shared-wallet fallback), as `GEMINI_API_TANGO_KEY=your-key` (or `GEMINI_API_KEY` as variable-name fallback). Get a key at [aistudio.google.com](https://aistudio.google.com/apikey).
 
 If you already installed [tango-research](https://github.com/shivag/tango-research), the key is shared — no extra setup.
 
